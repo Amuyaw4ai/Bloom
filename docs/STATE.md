@@ -81,3 +81,26 @@ For a grid row cell index $i$ (where $0 \le i < 42$):
 * **Trailing Padding Days ($\text{offsetIndex} \ge L_{\text{cycle}}$):** Belong to the subsequent cycle. They are rendered with low opacity, labeled as `Next · Day N`.
 
 This structure keeps the days mathematically consecutive and preserves the visual layout of standard calendar weeks.
+
+---
+
+## 4. Multi-Page Client-Side View Router
+
+To replace overlapping modals and provide a smooth, native app experience, Selene implements a lightweight, state-driven client-side view router in `App.jsx`.
+
+### Router Flow:
+* **Current View State:** House-level state `currentView` in `App.jsx` controls the mounted component:
+  * `'dashboard'`: Renders the default home layout (Calendar Grid, status cards, and daily logging panel).
+  * `'analytics'`: Renders full-screen statistics and detail drawers.
+  * `'bbt-trends'`: Renders full-screen temperature trend charts.
+  * `'cycle-history'`: Renders full-screen period log search and editing panels.
+
+### View Switcher Logic:
+```javascript
+{currentView === 'dashboard' && <DashboardView />}
+{currentView === 'analytics' && <StatsModal onClose={() => setCurrentView('dashboard')} />}
+{currentView === 'bbt-trends' && <BbtModal onClose={() => setCurrentView('dashboard')} />}
+{currentView === 'cycle-history' && <CycleHistoryModal onClose={() => setCurrentView('dashboard')} />}
+```
+This re-architecting removes overlapping overlay elements, reduces DOM bloat, and provides back-navigation shortcuts with smooth fade-in animations on viewport transitions.
+
