@@ -63,10 +63,8 @@ function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [infoTopic, setInfoTopic] = useState(null);
   const [isDeductionModalOpen, setIsDeductionModalOpen] = useState(false);
-  const [isBbtModalOpen, setIsBbtModalOpen] = useState(false);
-  const [isCycleHistoryModalOpen, setIsCycleHistoryModalOpen] = useState(false);
+  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'analytics', 'bbt-trends', 'cycle-history'
   const [cycleHistoryActiveTab, setCycleHistoryActiveTab] = useState(0);
-  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
 
   // Period Logging Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -245,11 +243,15 @@ function App() {
             
             {/* Analytics Insights Button */}
             <button
-              onClick={() => setIsStatsModalOpen(true)}
-              className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200/50 text-indigo-600 rounded-xl text-xs font-bold shadow-3xs cursor-pointer select-none transition-all flex items-center gap-1.5 active:scale-95"
+              onClick={() => setCurrentView(currentView === 'analytics' ? 'dashboard' : 'analytics')}
+              className={`px-3 py-1.5 border rounded-xl text-xs font-bold shadow-3xs cursor-pointer select-none transition-all flex items-center gap-1.5 active:scale-95 ${
+                currentView === 'analytics'
+                  ? 'bg-indigo-650 border-indigo-700 text-white hover:bg-indigo-750'
+                  : 'bg-indigo-50 hover:bg-indigo-100/80 border-indigo-200/50 text-indigo-650'
+              }`}
               title="View cycle statistics & analytics"
             >
-              <Activity className="h-4 w-4 text-indigo-550" />
+              <Activity className="h-4 w-4 shrink-0" />
               <span>Analytics Insights</span>
             </button>
 
@@ -267,210 +269,246 @@ function App() {
       {/* Main Workspace */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
         
-        {/* Dynamic Metric Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Card 1: Cycle Day */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-rose-500 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                Current Cycle
-                <button 
-                  onClick={() => setInfoTopic('phases')}
-                  className="text-slate-300 hover:text-indigo-500 transition-colors p-0.5 cursor-pointer"
-                  title="Understanding cycle phases"
-                >
-                  <Info className="h-3 w-3" />
-                </button>
-              </span>
-              <Activity className="h-5 w-5 text-rose-400" />
-            </div>
-            <div className="text-2xl font-extrabold text-slate-900">
-              {currentCycleDay ? `Day ${currentCycleDay}` : 'No cycle active'}
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              {currentCyclePhase}
-            </div>
-          </div>
-
-          {/* Card 2: Avg Cycle */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-purple-500 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                Average Cycle
-                <button 
-                  onClick={() => setInfoTopic('calculations')}
-                  className="text-slate-300 hover:text-indigo-500 transition-colors p-0.5 cursor-pointer"
-                  title="How cycles are calculated"
-                >
-                  <Info className="h-3 w-3" />
-                </button>
-              </span>
-              <Sparkles className="h-5 w-5 text-purple-400" />
-            </div>
-            <div className="text-2xl font-extrabold text-slate-900">{averageCycleLength} Days</div>
-            <div className="text-xs text-slate-500 mt-1">
-              {periods.length < 2 
-                ? 'Using standard fallback (28d)' 
-                : `Based on ${periods.length - 1} completed cycles`}
-            </div>
-          </div>
-
-          {/* Card 3: Next Ovulation */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-emerald-500 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                Next Ovulation
-                <button 
-                  onClick={() => setInfoTopic('symptothermal')}
-                  className="text-slate-300 hover:text-indigo-500 transition-colors p-0.5 cursor-pointer"
-                  title="Understanding ovulation and temperature shifts"
-                >
-                  <Info className="h-3 w-3" />
-                </button>
-              </span>
-              <Thermometer className="h-5 w-5 text-emerald-400" />
-            </div>
-            <div className="text-2xl font-extrabold text-slate-900">
-              {nextPredictedOvulationInfo 
-                ? `In ${nextPredictedOvulationInfo.daysUntil} Days` 
-                : 'N/A'}
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              {nextPredictedOvulationInfo 
-                ? `Predicted: ${nextPredictedOvulationInfo.formattedDate}` 
-                : 'Log a period to project'}
-            </div>
-          </div>
-
-          {/* Card 4: Fertility Status Today */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-            <div className="flex items-center justify-between text-amber-500 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-                Today's Fertility
-                <button 
-                  onClick={() => setInfoTopic('disclaimer')}
-                  className="text-slate-300 hover:text-rose-500 transition-colors p-0.5 cursor-pointer"
-                  title="Read safety limitations"
-                >
-                  <Info className="h-3 w-3" />
-                </button>
-              </span>
-              <Droplet className="h-5 w-5 text-amber-400" />
-            </div>
-            <div className="text-2xl font-extrabold text-slate-900">
-              {fertilityStatusToday.text}
-            </div>
-            <div className="text-xs text-slate-500 mt-1">
-              {fertilityStatusToday.desc}
-            </div>
-          </div>
-        </div>
-
-        {/* Dashboard Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Calendar Left Column (Main view) */}
-          <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs h-fit">
-            <CalendarGrid
-              currentMonth={currentMonth}
-              currentYear={currentYear}
-              onMonthChange={handleMonthChange}
-              selectedDate={selectedDate}
-              onSelectDate={setSelectedDate}
-              analyzedCycles={analyzedCycles}
-              projectedCycles={projectedCycles}
-              dailySymptoms={dailySymptoms}
-              todayStr={TODAY_STR}
-              calendarMode={calendarMode}
-              onCalendarModeChange={setCalendarMode}
-              averageCycleLength={averageCycleLength}
-              periods={periods}
-            />
-          </div>
-
-          {/* Sidebar Area */}
-          <div className="flex flex-col gap-6">
-            
-            {/* Selected Date Overview Card */}
-            <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col gap-4">
-              <div>
-                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Date Focus</h3>
-                <h4 className="text-md font-bold text-slate-900 mt-1">{selectedDateFormatted}</h4>
-                <p className="text-xs text-slate-500 mt-1">{selectedDate === TODAY_STR ? '(Simulated Today)' : ''}</p>
-              </div>
-
-              {/* Classification Badge */}
-              <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 p-4 rounded-xl">
-                <div className="flex-1">
-                  <span className="text-xs text-slate-400 font-semibold block uppercase">Computed State</span>
-                  <span className="text-sm font-bold text-slate-800 mt-0.5 block">{selectedDateClassification.label}</span>
+        {currentView === 'dashboard' && (
+          <>
+            {/* Dynamic Metric Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in">
+              {/* Card 1: Cycle Day */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                <div className="flex items-center justify-between text-rose-500 mb-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                    Current Cycle
+                    <button 
+                      onClick={() => setInfoTopic('phases')}
+                      className="text-slate-300 hover:text-indigo-500 transition-colors p-0.5 cursor-pointer"
+                      title="Understanding cycle phases"
+                    >
+                      <Info className="h-3 w-3" />
+                    </button>
+                  </span>
+                  <Activity className="h-5 w-5 text-rose-400" />
                 </div>
-                <div className="flex flex-col items-end gap-1.5">
-                  {/* Visual Circle Indicator */}
-                  <span className={`w-3.5 h-3.5 rounded-full shrink-0 ${
-                    selectedDateClassification.type === 'PERIOD' ? 'bg-rose-500' :
-                    selectedDateClassification.type === 'OVULATION' ? 'bg-emerald-500' :
-                    selectedDateClassification.type === 'UNSAFE' ? 'bg-amber-400' :
-                    selectedDateClassification.type === 'PREDICTED_PERIOD' ? 'bg-rose-300 animate-pulse' :
-                    selectedDateClassification.type === 'PREDICTED_OVULATION' ? 'bg-emerald-300 animate-pulse' :
-                    selectedDateClassification.type === 'PREDICTED_UNSAFE' ? 'bg-amber-300 animate-pulse' :
-                    'bg-slate-200'
-                  }`}></span>
-                  <button 
-                    onClick={() => setIsDeductionModalOpen(true)}
-                    className="text-[10px] font-bold text-indigo-600 hover:text-indigo-850 transition-colors uppercase tracking-wider underline cursor-pointer select-none"
-                  >
-                    Review Math
-                  </button>
+                <div className="text-2xl font-extrabold text-slate-900">
+                  {currentCycleDay ? `Day ${currentCycleDay}` : 'No cycle active'}
+                </div>
+                <div className="text-xs text-slate-550 mt-1">
+                  {currentCyclePhase}
                 </div>
               </div>
 
-              {/* Symptothermal Log Form */}
-              <div className="bg-white border border-slate-100/50 p-1 rounded-xl">
-                <SymptothermalForm
+              {/* Card 2: Avg Cycle */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                <div className="flex items-center justify-between text-purple-500 mb-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                    Average Cycle
+                    <button 
+                      onClick={() => setInfoTopic('calculations')}
+                      className="text-slate-300 hover:text-indigo-500 transition-colors p-0.5 cursor-pointer"
+                      title="How cycles are calculated"
+                    >
+                      <Info className="h-3 w-3" />
+                    </button>
+                  </span>
+                  <Sparkles className="h-5 w-5 text-purple-400" />
+                </div>
+                <div className="text-2xl font-extrabold text-slate-900">{averageCycleLength} Days</div>
+                <div className="text-xs text-slate-550 mt-1">
+                  {periods.length < 2 
+                    ? 'Using standard fallback (28d)' 
+                    : `Based on ${periods.length - 1} completed cycles`}
+                </div>
+              </div>
+
+              {/* Card 3: Next Ovulation */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                <div className="flex items-center justify-between text-emerald-500 mb-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                    Next Ovulation
+                    <button 
+                      onClick={() => setInfoTopic('symptothermal')}
+                      className="text-slate-300 hover:text-indigo-500 transition-colors p-0.5 cursor-pointer"
+                      title="Understanding ovulation and temperature shifts"
+                    >
+                      <Info className="h-3 w-3" />
+                    </button>
+                  </span>
+                  <Thermometer className="h-5 w-5 text-emerald-400" />
+                </div>
+                <div className="text-2xl font-extrabold text-slate-900">
+                  {nextPredictedOvulationInfo 
+                    ? `In ${nextPredictedOvulationInfo.daysUntil} Days` 
+                    : 'N/A'}
+                </div>
+                <div className="text-xs text-slate-550 mt-1">
+                  {nextPredictedOvulationInfo 
+                    ? `Predicted: ${nextPredictedOvulationInfo.formattedDate}` 
+                    : 'Log a period to project'}
+                </div>
+              </div>
+
+              {/* Card 4: Fertility Status Today */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+                <div className="flex items-center justify-between text-amber-500 mb-2">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                    Today's Fertility
+                    <button 
+                      onClick={() => setInfoTopic('disclaimer')}
+                      className="text-slate-300 hover:text-rose-500 transition-colors p-0.5 cursor-pointer"
+                      title="Read safety limitations"
+                    >
+                      <Info className="h-3 w-3" />
+                    </button>
+                  </span>
+                  <Droplet className="h-5 w-5 text-amber-400" />
+                </div>
+                <div className="text-2xl font-extrabold text-slate-900">
+                  {fertilityStatusToday.text}
+                </div>
+                <div className="text-xs text-slate-550 mt-1 font-medium leading-relaxed">
+                  {fertilityStatusToday.desc}
+                </div>
+              </div>
+            </div>
+
+            {/* Dashboard Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
+              {/* Calendar Left Column */}
+              <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs h-fit">
+                <CalendarGrid
+                  currentMonth={currentMonth}
+                  currentYear={currentYear}
+                  onMonthChange={handleMonthChange}
                   selectedDate={selectedDate}
-                  symptoms={dailySymptoms[selectedDate]}
-                  onSave={logSymptoms}
+                  onSelectDate={setSelectedDate}
+                  analyzedCycles={analyzedCycles}
+                  projectedCycles={projectedCycles}
+                  dailySymptoms={dailySymptoms}
+                  todayStr={TODAY_STR}
+                  calendarMode={calendarMode}
+                  onCalendarModeChange={setCalendarMode}
+                  averageCycleLength={averageCycleLength}
+                  periods={periods}
                 />
               </div>
+
+              {/* Sidebar Area */}
+              <div className="flex flex-col gap-6">
+                {/* Selected Date Overview Card */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs flex flex-col gap-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Date Focus</h3>
+                    <h4 className="text-md font-bold text-slate-900 mt-1">{selectedDateFormatted}</h4>
+                    <p className="text-xs text-slate-500 mt-1">{selectedDate === TODAY_STR ? '(Simulated Today)' : ''}</p>
+                  </div>
+
+                  {/* Classification Badge */}
+                  <div className="flex items-center gap-3 bg-slate-50 border border-slate-200/60 p-4 rounded-xl">
+                    <div className="flex-1">
+                      <span className="text-xs text-slate-400 font-semibold block uppercase">Computed State</span>
+                      <span className="text-sm font-bold text-slate-800 mt-0.5 block">{selectedDateClassification.label}</span>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5">
+                      {/* Visual Circle Indicator */}
+                      <span className={`w-3.5 h-3.5 rounded-full shrink-0 ${
+                        selectedDateClassification.type === 'PERIOD' ? 'bg-rose-500' :
+                        selectedDateClassification.type === 'OVULATION' ? 'bg-emerald-500' :
+                        selectedDateClassification.type === 'UNSAFE' ? 'bg-amber-400' :
+                        selectedDateClassification.type === 'PREDICTED_PERIOD' ? 'bg-rose-300 animate-pulse' :
+                        selectedDateClassification.type === 'PREDICTED_OVULATION' ? 'bg-emerald-300 animate-pulse' :
+                        selectedDateClassification.type === 'PREDICTED_UNSAFE' ? 'bg-amber-300 animate-pulse' :
+                        'bg-slate-200'
+                      }`}></span>
+                      <button 
+                        onClick={() => setIsDeductionModalOpen(true)}
+                        className="text-[10px] font-bold text-indigo-650 hover:text-indigo-850 transition-colors uppercase tracking-wider underline cursor-pointer select-none"
+                      >
+                        Review Math
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Symptothermal Log Form */}
+                  <div className="bg-white border border-slate-100/50 p-1 rounded-xl">
+                    <SymptothermalForm
+                      selectedDate={selectedDate}
+                      symptoms={dailySymptoms[selectedDate]}
+                      onSave={logSymptoms}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
+          </>
+        )}
 
-            {/* History manager relocated to settings drawer */}
+        {currentView === 'analytics' && (
+          <StatsModal
+            onClose={() => setCurrentView('dashboard')}
+            periods={periods}
+            analyzedCycles={analyzedCycles}
+            projectedCycles={projectedCycles}
+            dailySymptoms={dailySymptoms}
+            averageCycleLength={averageCycleLength}
+            todayStr={TODAY_STR}
+          />
+        )}
 
-          </div>
-        </div>
+        {currentView === 'bbt-trends' && (
+          <BbtModal
+            onClose={() => setCurrentView('dashboard')}
+            periods={periods}
+            dailySymptoms={dailySymptoms}
+            averageCycleLength={averageCycleLength}
+          />
+        )}
+
+        {currentView === 'cycle-history' && (
+          <CycleHistoryModal
+            onClose={() => setCurrentView('dashboard')}
+            periods={periods}
+            analyzedCycles={analyzedCycles}
+            projectedCycles={projectedCycles}
+            dailySymptoms={dailySymptoms}
+            averageCycleLength={averageCycleLength}
+            onOpenAddPeriod={handleOpenAddModal}
+            onOpenEditPeriod={handleOpenEditModal}
+            onDeletePeriod={deletePeriod}
+            initialTab={cycleHistoryActiveTab}
+            todayStr={TODAY_STR}
+          />
+        )}
       </main>
 
       {/* Period Logging Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-          <div className="bg-white rounded-2xl border border-slate-200 max-w-sm w-full p-6 shadow-xl flex flex-col gap-4 animate-scale-up">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in animate-duration-150">
+          <div className="bg-white rounded-3xl border border-slate-200 max-w-sm w-full p-6 shadow-2xl flex flex-col gap-4 animate-scale-up">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-lg text-slate-900">
+              <h3 className="font-bold text-sm uppercase tracking-wider text-slate-800">
                 {editingPeriodId ? 'Edit Menstrual Period' : 'Log Menstrual Period'}
               </h3>
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors"
+                className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             <form onSubmit={handleSavePeriod} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Start Date</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Start Date</label>
                 <input
                   type="date"
                   value={modalStartDate}
                   onChange={(e) => setModalStartDate(e.target.value)}
                   required
-                  className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+                  className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium"
                 />
               </div>
 
               {/* Ongoing Checkbox */}
-              <label className="flex items-center gap-2 cursor-pointer p-1.5 hover:bg-slate-50 border border-slate-150 rounded-xl transition-all shadow-3xs">
+              <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-slate-50 border border-slate-200 rounded-xl transition-all shadow-3xs">
                 <input
                   type="checkbox"
                   checked={modalIsOngoing}
@@ -488,14 +526,14 @@ function App() {
               </label>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">End Date (Active Bleeding Ends)</label>
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">End Date (Active Bleeding Ends)</label>
                 <input
                   type="date"
                   value={modalEndDate}
                   onChange={(e) => setModalEndDate(e.target.value)}
                   required={!modalIsOngoing}
                   disabled={modalIsOngoing}
-                  className={`p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 ${
+                  className={`p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 font-medium ${
                     modalIsOngoing ? 'opacity-40 cursor-not-allowed bg-slate-100' : ''
                   }`}
                 />
@@ -512,13 +550,13 @@ function App() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+                  className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors uppercase tracking-wider"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-rose-500 text-white hover:bg-rose-600 transition-colors rounded-xl text-sm font-semibold shadow-xs"
+                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white transition-all active:scale-95 rounded-xl text-xs font-bold shadow-3xs uppercase tracking-wider"
                 >
                   Save Log
                 </button>
@@ -549,10 +587,14 @@ function App() {
           setIsDrawerOpen(false);
           setInfoTopic(topic);
         }}
-        onOpenBbtModal={() => setIsBbtModalOpen(true)}
+        onOpenBbtModal={() => {
+          setIsDrawerOpen(false);
+          setCurrentView('bbt-trends');
+        }}
         onOpenCycleHistoryModal={(tab) => {
+          setIsDrawerOpen(false);
           setCycleHistoryActiveTab(tab);
-          setIsCycleHistoryModalOpen(true);
+          setCurrentView('cycle-history');
         }}
       />
 
@@ -560,15 +602,14 @@ function App() {
       {infoTopic && (
         <div 
           onClick={() => setInfoTopic(null)} 
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in animate-duration-150"
         >
           <div 
             onClick={(e) => e.stopPropagation()} 
             className="bg-white rounded-3xl border border-slate-200 max-w-lg w-full p-6 shadow-2xl flex flex-col gap-4 animate-scale-up"
           >
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                <Info className="h-4.5 w-4.5 text-indigo-500" />
+              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 flex items-center gap-2">
                 {infoTopic === 'calculations' && 'Ovulation & Fertility Logic'}
                 {infoTopic === 'symptothermal' && 'Symptothermal Double-Check'}
                 {infoTopic === 'disclaimer' && 'Medical Disclaimer & Limitations'}
@@ -582,14 +623,14 @@ function App() {
               </button>
             </div>
 
-            <div className="text-xs leading-relaxed text-slate-600 max-h-[300px] overflow-y-auto flex flex-col gap-3 pr-1 font-medium">
+            <div className="text-xs leading-relaxed text-slate-600 max-h-[300px] overflow-y-auto flex flex-col gap-3 pr-1 font-medium font-semibold">
               {infoTopic === 'calculations' && (
                 <>
                   <p>
                     Selene utilizes a dynamic, personalized mathematical model that adapts to your actual cycle history rather than assuming a static 28-day schedule.
                   </p>
                   <p className="font-bold text-slate-800">Key Calculations:</p>
-                  <ul className="list-disc pl-5 flex flex-col gap-1.5">
+                  <ul className="list-disc pl-5 flex flex-col gap-1.5 text-slate-500">
                     <li><strong>Cycle Length (L):</strong> The number of days between the start date of period i and the start date of period i+1.</li>
                     <li><strong>Rolling Average Cycle Length (Avg L):</strong> The mean length of all completed logged cycles. This acts as the baseline predictor.</li>
                     <li><strong>Ovulation Day Offset (O):</strong> Biologically, ovulation occurs approximately 14 days before the start of the next cycle. Thus, the offset is computed as O = L - 14.</li>
@@ -604,7 +645,7 @@ function App() {
                     Calendar-based calculations are mathematical approximations. The **Symptothermal Method** is a dual-indicator protocol that cross-references calendar models with physical biological markers.
                   </p>
                   <p className="font-bold text-slate-800">How to observe parameters daily:</p>
-                  <ul className="list-disc pl-5 flex flex-col gap-1.5">
+                  <ul className="list-disc pl-5 flex flex-col gap-1.5 text-slate-500">
                     <li><strong>Basal Body Temperature (BBT):</strong> Measure your body temperature immediately upon waking, before getting out of bed. Post-ovulation, progesterone triggers a sustained rise of **0.3°C to 0.5°C**, confirming ovulation has occurred.</li>
                     <li><strong>Cervical Mucus Texture:</strong> Observe sensations and consistency during restroom visits. High-fertility mucus is clear, wet, and stretches (like raw egg-white) between fingers, aiding sperm survival and mobility.</li>
                     <li><strong>Double-Check Validation:</strong> When both the calendar projection, egg-white mucus, and the post-ovulation thermal shift align, you can verify your ovulation with high clinical confidence.</li>
@@ -632,7 +673,7 @@ function App() {
                     A menstrual cycle is divided into distinct biological phases based on ovarian follicle growth and uterine lining changes:
                   </p>
                   <p className="font-bold text-slate-800">The 4 Key Cycle Phases:</p>
-                  <ul className="list-disc pl-5 flex flex-col gap-1.5">
+                  <ul className="list-disc pl-5 flex flex-col gap-1.5 text-slate-500">
                     <li><strong>Menstrual Phase (Days 1–5):</strong> The cycle begins on Day 1 of bleeding, where the uterus sheds its lining. <em>Biologically, menstruation is the first sub-phase of the follicular phase, as new follicles are already beginning to mature.</em></li>
                     <li><strong>Follicular Phase (Days 1–13):</strong> Overlapping with menstruation, follicles grow in the ovaries and secrete estrogen to build a new uterine lining.</li>
                     <li><strong>Ovulatory Phase (Days 14–15):</strong> A surge in Luteinizing Hormone (LH) triggers the ovary to release the mature egg.</li>
@@ -663,43 +704,6 @@ function App() {
         analyzedCycles={analyzedCycles}
         averageCycleLength={averageCycleLength}
         averagePeriodDuration={averagePeriodDuration}
-      />
-
-      {/* Waking Temperature Trends Modal */}
-      <BbtModal
-        isOpen={isBbtModalOpen}
-        onClose={() => setIsBbtModalOpen(false)}
-        periods={periods}
-        dailySymptoms={dailySymptoms}
-        averageCycleLength={averageCycleLength}
-      />
-
-      {/* Cycle History & Search Center Modal */}
-      <CycleHistoryModal
-        isOpen={isCycleHistoryModalOpen}
-        onClose={() => setIsCycleHistoryModalOpen(false)}
-        periods={periods}
-        analyzedCycles={analyzedCycles}
-        projectedCycles={projectedCycles}
-        dailySymptoms={dailySymptoms}
-        averageCycleLength={averageCycleLength}
-        onOpenAddPeriod={handleOpenAddModal}
-        onOpenEditPeriod={handleOpenEditModal}
-        onDeletePeriod={deletePeriod}
-        initialTab={cycleHistoryActiveTab}
-        todayStr={TODAY_STR}
-      />
-
-      {/* Analytics Insights Dashboard Modal */}
-      <StatsModal
-        isOpen={isStatsModalOpen}
-        onClose={() => setIsStatsModalOpen(false)}
-        periods={periods}
-        analyzedCycles={analyzedCycles}
-        projectedCycles={projectedCycles}
-        dailySymptoms={dailySymptoms}
-        averageCycleLength={averageCycleLength}
-        todayStr={TODAY_STR}
       />
     </div>
   )

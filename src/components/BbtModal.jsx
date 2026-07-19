@@ -1,17 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { X, Thermometer, Calendar } from 'lucide-react';
+import { Thermometer, Calendar } from 'lucide-react';
 import BbtChart from './BbtChart.jsx';
+import PageViewLayout from './PageViewLayout.jsx';
 import { parseDate } from '../utils/dateHelpers.js';
 
 export default function BbtModal({
-  isOpen,
   onClose,
   periods,
   dailySymptoms,
   averageCycleLength
 }) {
-  if (!isOpen) return null;
-
   // List of all cycles with temperature logs
   const cycles = useMemo(() => {
     return [...periods].reverse();
@@ -25,25 +23,21 @@ export default function BbtModal({
   }, [selectedCycleId, cycles]);
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-white rounded-3xl border border-slate-200 max-w-2xl w-full p-6 shadow-2xl flex flex-col gap-4 animate-scale-up">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div className="flex items-center gap-2 text-rose-500">
-            <Thermometer className="h-5 w-5" />
-            <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wider">Waking Temperature Trends</h3>
-          </div>
-          <button 
-            onClick={onClose}
-            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+    <PageViewLayout
+      title="Waking Temperature Trends"
+      icon={<Thermometer className="h-5 w-5 text-rose-500" />}
+      onBack={onClose}
+    >
+      <div className="flex flex-col gap-5">
+        
+        {/* Description */}
+        <p className="text-xs text-slate-500 font-medium">
+          Visualize your basal body temperature (BBT) logs per cycle to verify thermal shifts confirming ovulation.
+        </p>
 
         {/* Cycle Selector */}
         {cycles.length > 1 && (
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-150 w-fit">
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-200/80 w-fit shadow-3xs">
             <Calendar className="h-4 w-4 text-indigo-500" />
             <span>Select Cycle:</span>
             <select
@@ -64,7 +58,7 @@ export default function BbtModal({
         )}
 
         {/* Chart View */}
-        <div className="mt-2">
+        <div className="mt-2 border border-slate-100/50 p-2 rounded-2xl">
           {selectedCycle ? (
             <BbtChart 
               latestPeriod={selectedCycle} 
@@ -72,22 +66,22 @@ export default function BbtModal({
               averageCycleLength={averageCycleLength} 
             />
           ) : (
-            <div className="text-center py-8 text-slate-400 italic text-xs">
+            <div className="text-center py-12 text-slate-400 italic text-xs">
               No cycle logs available to display charts.
             </div>
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-end border-t border-slate-100 pt-3 mt-2">
+        {/* Action Button */}
+        <div className="flex justify-end border-t border-slate-100 pt-4 mt-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold select-none cursor-pointer"
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold select-none cursor-pointer active:scale-95 transition-all"
           >
-            Close Trends
+            Return to Dashboard
           </button>
         </div>
       </div>
-    </div>
+    </PageViewLayout>
   );
 }

@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { X, Activity, BarChart2, Calendar, Thermometer, Droplet, Clock, ShieldAlert, ChevronRight } from 'lucide-react';
+import { BarChart2, Calendar, Thermometer, Droplet, Clock, ShieldAlert, ChevronRight, X } from 'lucide-react';
 import { parseDate, getDaysBetween } from '../utils/dateHelpers.js';
+import PageViewLayout from './PageViewLayout.jsx';
 
 export default function StatsModal({
-  isOpen,
   onClose,
   periods,
   analyzedCycles,
@@ -12,8 +12,6 @@ export default function StatsModal({
   averageCycleLength,
   todayStr
 }) {
-  if (!isOpen) return null;
-
   // Selected details section (null, 0, 1, 2)
   const [selectedSection, setSelectedSection] = useState(null);
 
@@ -244,41 +242,23 @@ export default function StatsModal({
   ];
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-      {/* Click backdrop to close entire modal */}
-      <div 
-        onClick={onClose}
-        className="absolute inset-0 z-0 cursor-pointer"
-      />
-
-      {/* Invisible overlay click shield: clicking here closes the details modal popup */}
-      {selectedSection !== null && (
-        <div 
-          onClick={() => setSelectedSection(null)}
-          className="absolute inset-0 z-10 cursor-default"
-        />
-      )}
-
-      {/* Side-by-Side Flex Container */}
-      <div className="relative z-20 flex flex-col md:flex-row items-center md:items-stretch justify-center gap-4 max-w-4xl w-full">
+    <PageViewLayout
+      title="Analytics & Cycle Insights"
+      icon={<BarChart2 className="h-5 w-5 text-indigo-500 animate-pulse-slow" />}
+      onBack={onClose}
+    >
+      <div className="relative flex flex-col md:flex-row items-center md:items-stretch justify-center gap-6 w-full min-h-[400px]">
         
-        {/* Box 1: Analytics Category Menu Card */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-2xl flex flex-col gap-4 w-full max-w-sm shrink-0">
-          
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2 text-indigo-650">
-              <BarChart2 className="h-5 w-5 text-indigo-500 animate-pulse-slow" />
-              <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wider">Analytics Insights</h3>
-            </div>
-            <button 
-              onClick={onClose}
-              className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+        {/* Click shield to close the details card overlay inside the container */}
+        {selectedSection !== null && (
+          <div 
+            onClick={() => setSelectedSection(null)}
+            className="absolute inset-0 bg-slate-900/5 backdrop-blur-[1px] z-10 rounded-2xl cursor-default"
+          />
+        )}
 
+        {/* Box 1: Analytics Category Menu Card */}
+        <div className="border border-slate-200/80 p-5 rounded-2xl flex flex-col gap-4 w-full max-w-sm shrink-0 bg-white">
           <p className="text-xs text-slate-500 font-medium leading-relaxed">
             Select a category below to explore details. Click anywhere outside the details card to return.
           </p>
@@ -322,20 +302,20 @@ export default function StatsModal({
             })}
           </div>
 
-          {/* Footer close button */}
-          <div className="flex justify-end border-t border-slate-100 pt-3 mt-1">
+          {/* Return button */}
+          <div className="flex justify-end border-t border-slate-100 pt-3 mt-auto">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold select-none cursor-pointer"
+              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold select-none cursor-pointer transition-all active:scale-95"
             >
-              Close Analytics
+              Return to Dashboard
             </button>
           </div>
         </div>
 
-        {/* Box 2: Detail Popup (on the Right) */}
+        {/* Box 2: Detail Card (on the Right) */}
         {selectedSection !== null && (
-          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-2xl flex flex-col gap-4 w-full max-w-sm animate-scale-up z-20">
+          <div className="border border-slate-200 p-5 rounded-2xl flex flex-col gap-4 w-full max-w-sm animate-scale-up z-20 bg-white">
             
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -371,6 +351,6 @@ export default function StatsModal({
         )}
 
       </div>
-    </div>
+    </PageViewLayout>
   );
 }

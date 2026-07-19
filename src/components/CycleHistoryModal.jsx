@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { X, History, Search, Plus, Edit2, Trash2, Calendar, Droplet, Thermometer, Info } from 'lucide-react';
+import { History, Search, Plus, Edit2, Trash2, Calendar, Droplet, Thermometer } from 'lucide-react';
 import { parseDate, getDaysBetween, addDays } from '../utils/dateHelpers.js';
 import { getDayClassification } from '../utils/cycleEngine.js';
+import PageViewLayout from './PageViewLayout.jsx';
 
 export default function CycleHistoryModal({
-  isOpen,
   onClose,
   periods,
   analyzedCycles,
@@ -17,14 +17,12 @@ export default function CycleHistoryModal({
   initialTab = 0,
   todayStr
 }) {
-  if (!isOpen) return null;
-
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  // Sync tab when opening
+  // Sync tab when initialTab changes
   useEffect(() => {
     setActiveTab(initialTab);
-  }, [isOpen, initialTab]);
+  }, [initialTab]);
 
   // Combine cycles chronologically
   const allCyclesList = useMemo(() => {
@@ -75,17 +73,6 @@ export default function CycleHistoryModal({
     if (!dVal) return;
 
     // Find cycle containing searchDate
-    const containing = allCyclesList.find(c => {
-      if (searchDate >= c.startDate) {
-        if (!c.endDate || dVal <= c.endDate) return true;
-        // If it overlaps with next cycle start, it belongs to the next.
-        // We find the cycle that fits chronologically.
-      }
-      return false;
-    });
-
-    // Let's refine the containment check:
-    // A cycle starting at c.startDate contains dVal if dVal >= c.startDate and (no other cycle starts between c.startDate and dVal)
     const exactContaining = [...allCyclesList]
       .reverse() // sort oldest to newest for forward check
       .find((c, idx, arr) => {
@@ -124,29 +111,20 @@ export default function CycleHistoryModal({
   }, [selectedCycle, analyzedCycles, projectedCycles, dailySymptoms, todayStr]);
 
   return (
-    <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-fade-in">
-      <div className="bg-white rounded-3xl border border-slate-200 max-w-3xl w-full p-6 shadow-2xl flex flex-col gap-4 animate-scale-up max-h-[85vh]">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <div className="flex items-center gap-2 text-rose-500">
-            <History className="h-5 w-5" />
-            <h3 className="font-bold text-sm text-slate-900 uppercase tracking-wider">Cycle History & Search Center</h3>
-          </div>
-          <button 
-            onClick={onClose}
-            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-
+    <PageViewLayout
+      title="Cycle History & Search Center"
+      icon={<History className="h-5 w-5 text-rose-500" />}
+      onBack={onClose}
+    >
+      <div className="flex flex-col gap-5">
+        
         {/* Tabs navigation */}
-        <div className="flex border-b border-slate-100 p-0.5 bg-slate-50 rounded-xl w-fit">
+        <div className="flex border border-slate-200/50 p-1 bg-slate-50/50 rounded-xl w-fit">
           <button
             onClick={() => setActiveTab(0)}
             className={`px-4 py-1.5 text-xs font-bold uppercase rounded-lg transition-all cursor-pointer ${
               activeTab === 0 
-                ? 'bg-white text-slate-800 shadow-3xs border border-slate-200/50' 
+                ? 'bg-white text-slate-800 shadow-3xs border border-slate-250/20' 
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -156,7 +134,7 @@ export default function CycleHistoryModal({
             onClick={() => setActiveTab(1)}
             className={`px-4 py-1.5 text-xs font-bold uppercase rounded-lg transition-all cursor-pointer ${
               activeTab === 1 
-                ? 'bg-white text-slate-800 shadow-3xs border border-slate-200/50' 
+                ? 'bg-white text-slate-800 shadow-3xs border border-slate-250/20' 
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
@@ -165,29 +143,26 @@ export default function CycleHistoryModal({
         </div>
 
         {/* Tab Content */}
-        <div className="flex-1 overflow-y-auto min-h-[300px] pr-1">
+        <div className="min-h-[300px]">
           
           {/* TAB 1: Logged Cycles */}
           {activeTab === 0 && (
             <div className="flex flex-col gap-4">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-medium text-slate-550">
-                  Review, edit, or delete your historical logged cycles.
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <p className="text-xs font-medium text-slate-500">
+                  Review, edit, or delete your historical logged periods.
                 </p>
                 <button
-                  onClick={() => {
-                    onClose();
-                    onOpenAddPeriod();
-                  }}
-                  className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-[11px] font-bold shadow-2xs cursor-pointer flex items-center gap-1 transition-colors"
+                  onClick={onOpenAddPeriod}
+                  className="px-3 py-1.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-[11px] font-bold shadow-2xs cursor-pointer flex items-center gap-1 transition-all active:scale-95 w-fit"
                 >
                   <Plus className="h-3.5 w-3.5" /> Log Period Cycle
                 </button>
               </div>
 
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-3">
                 {periods.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400 italic text-xs border border-dashed border-slate-200 rounded-2xl bg-slate-50">
+                  <div className="text-center py-16 text-slate-400 italic text-xs border border-dashed border-slate-200 rounded-2xl bg-slate-50">
                     No period logs recorded yet. Click "Log Period Cycle" to get started.
                   </div>
                 ) : (
@@ -199,9 +174,9 @@ export default function CycleHistoryModal({
                     return (
                       <div 
                         key={period.id} 
-                        className={`flex items-center justify-between p-4 border rounded-2xl text-xs hover:bg-slate-50/50 transition-colors ${
+                        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 border rounded-2xl text-xs hover:bg-slate-50/50 transition-colors ${
                           period.isOngoing 
-                            ? 'bg-rose-50/40 border-rose-200 shadow-3xs' 
+                            ? 'bg-rose-50/40 border-rose-250/80 shadow-3xs' 
                             : 'bg-slate-50/60 border-slate-200/80'
                         }`}
                       >
@@ -234,10 +209,7 @@ export default function CycleHistoryModal({
                             {duration} {period.isOngoing ? 'Days Active' : 'Days Period'}
                           </span>
                           <button
-                            onClick={() => {
-                              onClose();
-                              onOpenEditPeriod(period);
-                            }}
+                            onClick={() => onOpenEditPeriod(period)}
                             className="p-1.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-indigo-600 hover:border-indigo-200 transition-colors cursor-pointer"
                             title="Edit dates"
                           >
@@ -263,7 +235,7 @@ export default function CycleHistoryModal({
           {activeTab === 1 && (
             <div className="flex flex-col gap-4">
               {/* Search fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 border border-slate-200/50 rounded-2xl">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 border border-slate-200/50 rounded-2xl">
                 {/* Select dropdown */}
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Select Cycle</label>
@@ -323,10 +295,10 @@ export default function CycleHistoryModal({
                   {/* Days Details Breakdown */}
                   <div>
                     <h5 className="font-bold text-[10px] text-slate-400 uppercase tracking-wider mb-2">Cycle Days List</h5>
-                    <div className="border border-slate-200/60 rounded-2xl overflow-hidden max-h-[300px] overflow-y-auto">
+                    <div className="border border-slate-200/60 rounded-2xl overflow-hidden max-h-[350px] overflow-y-auto">
                       <table className="w-full text-left border-collapse text-xs">
                         <thead>
-                          <tr className="bg-slate-50 text-slate-400 font-bold text-[10px] uppercase border-b border-slate-200/60">
+                          <tr className="bg-slate-50 text-slate-450 font-bold text-[10px] uppercase border-b border-slate-200/60 sticky top-0 z-10">
                             <th className="p-3 pl-4">Cycle Day</th>
                             <th className="p-3">Date</th>
                             <th className="p-3">Classification</th>
@@ -343,23 +315,23 @@ export default function CycleHistoryModal({
                             let classText = 'Safe Day';
                             let badgeStyle = 'bg-slate-50 text-slate-600 border-slate-200';
                             if (classification.type === 'PERIOD') {
-                              classText = 'Period Bleeding';
-                              badgeStyle = 'bg-rose-500 text-white border-rose-500';
+                                classText = 'Period Bleeding';
+                                badgeStyle = 'bg-rose-500 text-white border-rose-500';
                             } else if (classification.type === 'OVULATION') {
-                              classText = 'Ovulation Day';
-                              badgeStyle = 'bg-emerald-500 text-white border-emerald-500';
+                                classText = 'Ovulation Day';
+                                badgeStyle = 'bg-emerald-500 text-white border-emerald-500';
                             } else if (classification.type === 'UNSAFE') {
-                              classText = 'Fertile Window (High)';
-                              badgeStyle = 'bg-amber-100 text-amber-900 border-amber-300';
+                                classText = 'Fertile Window (High)';
+                                badgeStyle = 'bg-amber-100 text-amber-900 border-amber-300';
                             } else if (classification.type === 'PREDICTED_PERIOD') {
-                              classText = 'Predicted Period';
-                              badgeStyle = 'bg-rose-50 text-rose-800 border-rose-200 border-dashed';
+                                classText = 'Predicted Period';
+                                badgeStyle = 'bg-rose-50 text-rose-800 border-rose-200 border-dashed';
                             } else if (classification.type === 'PREDICTED_OVULATION') {
-                              classText = 'Predicted Ovulation';
-                              badgeStyle = 'bg-emerald-50 text-emerald-800 border-emerald-200 border-dashed';
+                                classText = 'Predicted Ovulation';
+                                badgeStyle = 'bg-emerald-50 text-emerald-800 border-emerald-200 border-dashed';
                             } else if (classification.type === 'PREDICTED_UNSAFE') {
-                              classText = 'Predicted Fertile';
-                              badgeStyle = 'bg-amber-50 text-amber-800 border-amber-200 border-dashed';
+                                classText = 'Predicted Fertile';
+                                badgeStyle = 'bg-amber-50 text-amber-800 border-amber-200 border-dashed';
                             }
 
                             return (
@@ -404,7 +376,7 @@ export default function CycleHistoryModal({
                                         Symptom Alert
                                       </span>
                                     )}
-                                    {!hasTemp && !hasMucus && !hasWarning && <span className="italic">No parameters logged</span>}
+                                    {!hasTemp && !hasMucus && !hasWarning && <span className="italic text-[9px]">No logs</span>}
                                   </div>
                                 </td>
                               </tr>
@@ -416,7 +388,7 @@ export default function CycleHistoryModal({
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-12 text-slate-400 italic text-xs border border-dashed border-slate-200 rounded-2xl bg-slate-50">
+                <div className="text-center py-16 text-slate-400 italic text-xs border border-dashed border-slate-200 rounded-2xl bg-slate-50">
                   Select a cycle above to see its detailed day list.
                 </div>
               )}
@@ -425,16 +397,16 @@ export default function CycleHistoryModal({
 
         </div>
 
-        {/* Footer */}
-        <div className="flex justify-end border-t border-slate-100 pt-3 mt-2">
+        {/* Return button */}
+        <div className="flex justify-end border-t border-slate-100 pt-4 mt-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold select-none cursor-pointer"
+            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold select-none cursor-pointer active:scale-95 transition-all"
           >
-            Close History
+            Return to Dashboard
           </button>
         </div>
       </div>
-    </div>
+    </PageViewLayout>
   );
 }
