@@ -13,6 +13,7 @@ To showcase how Selene translates physical biological indicators into clean soft
 * **[Biological Engine & Calculations](./docs/BIOLOGY.md):** The math and biology behind rolling averages, ovulation offsets, and symptothermal double-check validation.
 * **[React State & Grid Geometry](./docs/STATE.md):** Deep-dive into hook architecture, local storage persistence, and coordinate shift calculations for the cycle-specific calendar view.
 * **[AI Collaboration & Resolution Log](./docs/AI_COLLABORATION.md):** Prompts, architectural debates, and corrections applied to AI hallucinations (e.g. column-shifting grids and phase overlaps).
+* **[Clinical Research: Menstrual Flow & Cycle Abnormalities](./docs/CLINICAL_RESEARCH.md):** Future insights engine research regarding Oligomenorrhea, Hypomenorrhea, Polymenorrhea, and PBAC flow volume calculations.
 
 ---
 
