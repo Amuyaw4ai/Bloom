@@ -156,7 +156,7 @@ export function analyzeCycles(periods) {
         start: unsafeStart,
         end: unsafeEnd
       },
-      isOngoing: isLast
+      isOngoing: isLast && (period.isOngoing || !period.endDate)
     };
   });
 }
