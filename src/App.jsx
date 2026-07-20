@@ -30,6 +30,7 @@ import DeductionModal from './components/DeductionModal.jsx'
 import BbtModal from './components/BbtModal.jsx'
 import CycleHistoryModal from './components/CycleHistoryModal.jsx'
 import StatsModal from './components/StatsModal.jsx'
+import HelpView from './components/HelpView.jsx'
 
 const TODAY_STR = formatDate(new Date());
 
@@ -477,6 +478,12 @@ function App() {
             todayStr={TODAY_STR}
           />
         )}
+
+        {currentView === 'help' && (
+          <HelpView
+            onClose={() => setCurrentView('dashboard')}
+          />
+        )}
       </main>
 
       {/* Period Logging Modal */}
@@ -583,10 +590,6 @@ function App() {
         userProfile={userProfile}
         periods={periods}
         onResetData={resetData}
-        onOpenInfoTopic={(topic) => {
-          setIsDrawerOpen(false);
-          setInfoTopic(topic);
-        }}
         onOpenBbtModal={() => {
           setIsDrawerOpen(false);
           setCurrentView('bbt-trends');
@@ -595,6 +598,10 @@ function App() {
           setIsDrawerOpen(false);
           setCycleHistoryActiveTab(tab);
           setCurrentView('cycle-history');
+        }}
+        onOpenHelpPage={() => {
+          setIsDrawerOpen(false);
+          setCurrentView('help');
         }}
       />
 
