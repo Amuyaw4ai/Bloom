@@ -128,7 +128,7 @@ export default function CycleHistoryModal({
                 : 'text-slate-500 hover:text-slate-700'
             }`}
           >
-            Logged Cycles ({periods.length} Periods / {analyzedCycles.length} Cycles)
+            Logged Cycles ({periods.length})
           </button>
           <button
             onClick={() => setActiveTab(1)}

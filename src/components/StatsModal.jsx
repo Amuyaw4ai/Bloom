@@ -309,33 +309,6 @@ export default function StatsModal({
       onBack={onClose}
     >
       <div className="flex flex-col gap-6 w-full">
-        
-        {/* Top Summary Banner: Total Logged Cycles Analysis */}
-        <div className="bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 text-white p-5 rounded-2xl shadow-xs border border-indigo-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-rose-400" />
-              <span className="text-[10px] uppercase font-extrabold tracking-wider text-indigo-200">Total Logged Cycles Analysis</span>
-              <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/20">
-                {analyzedCycles.length} Total Logged
-              </span>
-            </div>
-            <div className="text-xl font-extrabold tracking-tight">
-              {cycleStats.completedCount} Completed Cycle{cycleStats.completedCount !== 1 ? 's' : ''} {cycleStats.ongoingCount > 0 ? `+ 1 Active Cycle` : ''}
-            </div>
-            <p className="text-xs text-indigo-200/80 font-medium">
-              Average Cycle: <strong className="text-white font-bold">{cycleStats.avg} Days</strong> • Period Duration Avg: <strong className="text-white font-bold">{periodStats.avg} Days</strong>
-            </p>
-          </div>
-
-          <div className="flex flex-col items-start sm:items-end gap-1 shrink-0">
-            <span className="text-[10px] uppercase font-extrabold tracking-wider text-slate-300">Statistical Surety</span>
-            <span className={`text-xs font-extrabold px-3 py-1 rounded-xl border shadow-2xs ${cycleStats.confidenceBadge}`}>
-              {cycleStats.confidenceLevel}
-            </span>
-          </div>
-        </div>
-
         {/* Categories Grid Container */}
         <div className="relative flex flex-col md:flex-row items-center md:items-stretch justify-center gap-6 w-full min-h-[400px]">
           

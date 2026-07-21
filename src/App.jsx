@@ -296,13 +296,8 @@ function App() {
                 <div className="text-2xl font-extrabold text-slate-900">
                   {currentCycleDay ? `Day ${currentCycleDay}` : 'No cycle active'}
                 </div>
-                <div className="text-xs text-slate-550 mt-1 flex justify-between items-center">
-                  <span>{currentCyclePhase}</span>
-                  {analyzedCycles.length > 0 && (
-                    <span className="text-[10px] font-extrabold text-indigo-650 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
-                      Cycle #{analyzedCycles.length} of {analyzedCycles.length}
-                    </span>
-                  )}
+                <div className="text-xs text-slate-550 mt-1">
+                  {currentCyclePhase}
                 </div>
               </div>
 
@@ -324,8 +319,8 @@ function App() {
                 <div className="text-2xl font-extrabold text-slate-900">{averageCycleLength} Days</div>
                 <div className="text-xs text-slate-550 mt-1">
                   {completedCyclesCount === 0 
-                    ? `Default baseline (0 completed / ${analyzedCycles.length} logged)` 
-                    : `Based on ${completedCyclesCount} completed cycle${completedCyclesCount > 1 ? 's' : ''} (${analyzedCycles.length} total logged)`}
+                    ? 'Using standard fallback (28d)' 
+                    : `Based on ${completedCyclesCount} completed cycle${completedCyclesCount > 1 ? 's' : ''}`}
                 </div>
               </div>
 
@@ -351,7 +346,7 @@ function App() {
                 </div>
                 <div className="text-xs text-slate-550 mt-1">
                   {nextPredictedOvulationInfo 
-                    ? `Predicted: ${nextPredictedOvulationInfo.formattedDate} (Cycle #${analyzedCycles.length + 1})` 
+                    ? `Predicted: ${nextPredictedOvulationInfo.formattedDate}` 
                     : 'Log a period to project'}
                 </div>
               </div>
@@ -375,7 +370,7 @@ function App() {
                   {fertilityStatusToday.text}
                 </div>
                 <div className="text-xs text-slate-550 mt-1 font-medium leading-relaxed">
-                  {fertilityStatusToday.desc} {analyzedCycles.length > 0 ? `• Cycle #${analyzedCycles.length}` : ''}
+                  {fertilityStatusToday.desc}
                 </div>
               </div>
             </div>

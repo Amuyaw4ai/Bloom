@@ -489,7 +489,6 @@ export default function CalendarGrid({
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-rose-500 animate-pulse"></span>
             <span>Cycle #{currentCycleIndex + 1} of {allCyclesList.length}</span>
-            <span className="text-[10px] text-rose-600 font-medium">({analyzedCycles?.length || 0} Logged Cycles Total)</span>
           </div>
           {selectedCycleStart && (
             <span className="text-[10px] font-bold font-mono text-rose-700 bg-white px-2 py-0.5 rounded border border-rose-200">

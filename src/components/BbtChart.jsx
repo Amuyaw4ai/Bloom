@@ -121,7 +121,7 @@ export default function BbtChart({ latestPeriod, dailySymptoms, averageCycleLeng
           Basal Body Temperature (BBT) Trend Chart
         </h3>
         <p className="text-xs text-slate-500 mt-1">
-          Tracking temperature shifts for {cycleIndex && totalCycles ? `Cycle #${cycleIndex} of ${totalCycles} (Started ${parseDate(latestPeriod.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })})` : `the cycle starting ${parseDate(latestPeriod.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}.
+          Tracking temperature shifts for the cycle starting {parseDate(latestPeriod.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.
         </p>
       </div>
 
